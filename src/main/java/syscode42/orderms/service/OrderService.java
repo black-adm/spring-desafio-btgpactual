@@ -1,7 +1,10 @@
 package syscode42.orderms.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import syscode42.orderms.dto.OrderCreatedEvent;
+import syscode42.orderms.dto.http.OrderResponse;
+import syscode42.orderms.dto.queue.OrderCreatedEvent;
 import syscode42.orderms.entity.OrderEntity;
 import syscode42.orderms.entity.OrderItem;
 import syscode42.orderms.repository.OrderRepository;
@@ -19,7 +22,6 @@ public class OrderService {
     }
 
     public void save(OrderCreatedEvent event) {
-
         var entity = new OrderEntity();
 
         entity.setOrderId(event.codigoPedido());
@@ -45,5 +47,10 @@ public class OrderService {
                 .map(i -> i.preco().multiply(BigDecimal.valueOf(i.quantidade())))
                 .reduce(BigDecimal::add)
                 .orElse(BigDecimal.ZERO);
+    }
+
+    public Page<OrderResponse> findAllByCustomerId(Long customerId, PageRequest pageRequest) {
+        var orders = orderRepository.findAllByCustomerId(customerId, pageRequest);
+        return orders.map(OrderResponse::fromEntity);
     }
 }

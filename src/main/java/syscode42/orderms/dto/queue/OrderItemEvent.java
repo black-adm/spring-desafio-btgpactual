@@ -1,4 +1,4 @@
-package syscode42.orderms.dto;
+package syscode42.orderms.dto.queue;
 
 import java.math.BigDecimal;
 
