@@ -3,9 +3,12 @@ package syscode42.orderms.controller;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatusCode;
 import syscode42.orderms.factory.OrderResponseFactory;
 import syscode42.orderms.service.OrderService;
@@ -26,12 +29,17 @@ class OrderControllerTest {
     @InjectMocks
     OrderController orderController;
 
+    @Captor
+    ArgumentCaptor<Long> customerIdCaptor;
+
+    @Captor
+    ArgumentCaptor<PageRequest> pageRequestCaptor;
+
     @Nested
     class ListOrders {
 
         @Test
         void shouldReturnHttpOk() {
-
             var customerId = 1L;
             var page = 0;
             var pageSize = 10;
@@ -40,7 +48,7 @@ class OrderControllerTest {
                     .when(orderService)
                     .findAllByCustomerId(anyLong(), any());
 
-            doReturn(BigDecimal.valueOf(2.50))
+            doReturn(BigDecimal.valueOf(22.50))
                     .when(orderService)
                     .findTotalOnOrdersByCustomerId(anyLong());
 
@@ -51,7 +59,25 @@ class OrderControllerTest {
 
         @Test
         void shouldPassCorrectParamtersToService() {
+            var customerId = 1L;
+            var page = 0;
+            var pageSize = 10;
 
+            doReturn(OrderResponseFactory.buildWithOneItem())
+                    .when(orderService)
+                    .findAllByCustomerId(customerIdCaptor.capture(), pageRequestCaptor.capture());
+
+            doReturn(BigDecimal.valueOf(22.50))
+                    .when(orderService)
+                    .findTotalOnOrdersByCustomerId(customerIdCaptor.capture());
+
+            orderController.listOrders(customerId, page, pageSize);
+
+            assertEquals(2, customerIdCaptor.getAllValues().size());
+            assertEquals(customerId, customerIdCaptor.getAllValues().get(0));
+            assertEquals(customerId, customerIdCaptor.getAllValues().get(1));
+            assertEquals(page, pageRequestCaptor.getValue().getPageNumber());
+            assertEquals(pageSize, pageRequestCaptor.getValue().getPageSize());
         }
 
         @Test
