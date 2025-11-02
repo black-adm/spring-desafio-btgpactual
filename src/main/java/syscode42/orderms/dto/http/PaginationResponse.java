@@ -2,12 +2,7 @@ package syscode42.orderms.dto.http;
 
 import org.springframework.data.domain.Page;
 
-public record PaginationResponse(
-        Integer page,
-        Integer pageSize,
-        Long totalElements,
-        Integer totalPages
-) {
+public record PaginationResponse(Integer page, Integer pageSize, Long totalElements, Integer totalPages) {
     public static PaginationResponse fromPage(Page<?> page) {
         return new PaginationResponse(
                 page.getNumber(),

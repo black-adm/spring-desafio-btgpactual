@@ -11,6 +11,8 @@ import syscode42.orderms.dto.http.OrderResponse;
 import syscode42.orderms.dto.http.PaginationResponse;
 import syscode42.orderms.service.OrderService;
 
+import java.util.Map;
+
 @RestController
 public class OrderController {
 
@@ -27,8 +29,10 @@ public class OrderController {
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize
     ) {
         var response = orderService.findAllByCustomerId(customerId, PageRequest.of(page, pageSize));
+        var totalOnOrders = orderService.findTotalOnOrdersByCustomerId(customerId);
 
         return ResponseEntity.ok(new ApiResponse<>(
+                Map.of("totalOnOrders", totalOnOrders),
                 response.getContent(),
                 PaginationResponse.fromPage(response)
         ));
