@@ -16,6 +16,7 @@ import syscode42.orderms.service.OrderService;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
@@ -82,7 +83,34 @@ class OrderControllerTest {
 
         @Test
         void shouldReturnResponseBodyCorrectly() {
+            var customerId = 1L;
+            var page = 0;
+            var pageSize = 10;
+            var totalOnOrders = BigDecimal.valueOf(22.50);
+            var pagination = OrderResponseFactory.buildWithOneItem();
 
+            doReturn(pagination)
+                    .when(orderService)
+                    .findAllByCustomerId(anyLong(), any());
+
+            doReturn(totalOnOrders)
+                    .when(orderService)
+                    .findTotalOnOrdersByCustomerId(anyLong());
+
+            var response = orderController.listOrders(customerId, page, pageSize);
+
+            assertNotNull(response);
+            assertNotNull(response.getBody());
+            assertNotNull(response.getBody().data());
+            assertNotNull(response.getBody().pagination());
+            assertNotNull(response.getBody().summary());
+
+            assertEquals(totalOnOrders, response.getBody().summary().get("totalOnOrders"));
+            assertEquals(pagination.getTotalElements(), response.getBody().pagination().totalElements());
+            assertEquals(pagination.getTotalPages(), response.getBody().pagination().totalPages());
+            assertEquals(pagination.getNumber(), response.getBody().pagination().page());
+            assertEquals(pagination.getSize(), response.getBody().pagination().pageSize());
+            assertEquals(pagination.getContent(), response.getBody().data());
         }
     }
 }
